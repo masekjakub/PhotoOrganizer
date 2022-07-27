@@ -17,6 +17,9 @@ class bcolors:
 
 IMGTYPES=('.img','.jpg','.JPG','.jpeg','JPEG','.png','.PNG','.raw','.jfif')
 
+movedCount=0
+notMovedCount=0
+
 def getDate(file):
     with open(file, 'rb') as fh:
         tags = exifread.process_file(fh, stop_tag="EXIF DateTimeDigitized")
@@ -24,25 +27,29 @@ def getDate(file):
         dateTimeArr = str(dateTaken).split(" ")
         return dateTimeArr[0]
 
-def moveToDir(file, dirName):
-    Path(newDirName).mkdir(exist_ok=True)
+def moveToDir(file, path, dirName):
+    global movedCount
+    global notMovedCount
+    Path(dirName).mkdir(exist_ok=True)
+    # if image is already in folder
+    if os.path.exists(f"{startDir}\{dirName}\{file}"):
+        os.remove(path)
+        return
     try:
-        shutil.move(file, dirName)
+        shutil.move(path, dirName)
         movedCount = movedCount+1
     except:
         notMovedCount = notMovedCount+1
 
+###### MAIN #######
 print("This utility takes all images in entered path (including sub-directories) and organize them by date to folders.")       
-rootPath = input("Enter path:")
-while not os.path.exists(rootPath):
-    rootPath = input("Enter path:")
+startDir = input("Enter path:")
+while not os.path.exists(startDir):
+    startDir = input("Enter path:")
 
-movedCount=0
-notMovedCount=0
-startDir = os.getcwd()
 #walk through all directories and find files
 for root, dirs, files in os.walk(startDir,topdown=True):
-    if re.search("\\\[0-9][0-9][0-9][0-9]-[0-1][0-9]$", root):
+    if re.search("\\\[0-9]{4}-[0-1][0-9]$", root) or root.endswith("Unknown date"):
         continue
     for file in files:
         name, ext = os.path.splitext(file)
@@ -51,12 +58,12 @@ for root, dirs, files in os.walk(startDir,topdown=True):
             try:
                 dateTaken = getDate(pathOfFile)
             except:
-                moveToDir(pathOfFile, "Unknown date")
+                moveToDir(name, pathOfFile, "Unknown date")
                 continue
 
             year, month, day = dateTaken.split(":")
             newDirName = f"{year}-{month}"
-            moveToDir(pathOfFile, newDirName)
+            moveToDir(file, pathOfFile, newDirName)
 
 print(bcolors.OKGREEN+ f" Moved files:{movedCount}"+bcolors.ENDC)
 print(bcolors.FAIL+ f" Files with invalid metadata:{notMovedCount}"+bcolors.ENDC)
