@@ -4,6 +4,7 @@ from pathlib import Path
 import shutil
 import re
 
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -15,10 +16,14 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-IMGTYPES=('.img','.jpg','.JPG','.jpeg','JPEG','.png','.PNG','.raw','.jfif','.mp4')
 
-movedCount=0
-notMovedCount=0
+IMGTYPES = ('.img', '.jpg', '.JPG', '.jpeg', 'JPEG',
+            '.png', '.PNG', '.raw', '.jfif', '.mp4')
+
+movedCount = 0
+notMovedCount = 0
+invalidCount = 0
+
 
 def getDate(file):
     with open(file, 'rb') as fh:
@@ -27,10 +32,11 @@ def getDate(file):
         dateTimeArr = str(dateTaken).split(" ")
         return dateTimeArr[0]
 
+
 def moveToDir(file, path, dirName):
     global movedCount
     global notMovedCount
-    os.makedirs(dirName,exist_ok = True)
+    os.makedirs(dirName, exist_ok=True)
     # if image is already in folder
     if os.path.exists(f"{startDir}\{dirName}\{file}"):
         os.remove(path)
@@ -41,33 +47,38 @@ def moveToDir(file, path, dirName):
     except:
         notMovedCount = notMovedCount+1
 
+
 ###### MAIN #######
 print()
 print("This utility takes all images in entered path (including sub-directories) and organize them by date to folders.")
-print(bcolors.WARNING+ "Warning! Changes in folders can't be reverted!"+bcolors.ENDC)      
+print(bcolors.WARNING + "Warning! Changes in folders can't be reverted!"+bcolors.ENDC)
 startDir = input("Enter path:")
+print()
+
 while not os.path.exists(startDir):
     startDir = input("Enter path:")
 os.chdir(startDir)
 
-#walk through all directories and find files
-for root, dirs, files in os.walk(startDir,topdown=True):
+# walk through all directories and find files
+for root, dirs, files in os.walk(startDir, topdown=True):
     if re.search("\\\[0-9]{4}-[0-1][0-9]$", root) or root.endswith("Unknown date"):
         continue
     for file in files:
         name, ext = os.path.splitext(file)
-        if any (ext in file for ext in IMGTYPES):
+        if any(ext in file for ext in IMGTYPES):
             pathOfFile = os.path.join(root, file)
             try:
                 dateTaken = getDate(pathOfFile)
             except:
                 moveToDir(file, pathOfFile, "Unknown date")
+                invalidCount = invalidCount+1
                 continue
 
             year, month, day = dateTaken.split(":")
             newDirName = f"{year}\{year}-{month}"
             moveToDir(file, pathOfFile, newDirName)
 
-print(bcolors.OKGREEN+ f"Moved files:{movedCount}"+bcolors.ENDC)
-print(bcolors.FAIL+ f"Files with invalid metadata:{notMovedCount}"+bcolors.ENDC)
+print(bcolors.OKGREEN + f"Moved files: {movedCount}"+bcolors.ENDC)
+print(f"Files with unknown date: {invalidCount}"+bcolors.ENDC)
+print(bcolors.FAIL + f"Errors: {notMovedCount}"+bcolors.ENDC)
 print()
