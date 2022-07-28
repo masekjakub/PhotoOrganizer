@@ -14,12 +14,12 @@ class bcolors:
     FAIL = '\033[91m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
 
 
 IMGTYPES = ('.img', '.jpg', '.JPG', '.jpeg', 'JPEG',
             '.png', '.PNG', '.raw', '.jfif', '.mp4')
 
+dateRegex = "\\\[0-9]{4}-[0-1][0-9]$"
 movedCount = 0
 notMovedCount = 0
 invalidCount = 0
@@ -37,6 +37,7 @@ def moveToDir(file, path, dirName):
     global movedCount
     global notMovedCount
     os.makedirs(dirName, exist_ok=True)
+
     # if image is already in folder
     if os.path.exists(f"{startDir}\{dirName}\{file}"):
         os.remove(path)
@@ -53,7 +54,6 @@ print()
 print("This utility takes all images in entered path (including sub-directories) and organize them by date to folders.")
 print(bcolors.WARNING + "Warning! Changes in folders can't be reverted!"+bcolors.ENDC)
 startDir = input("Enter path:")
-print()
 
 while not os.path.exists(startDir):
     startDir = input("Enter path:")
@@ -61,7 +61,7 @@ os.chdir(startDir)
 
 # walk through all directories and find files
 for root, dirs, files in os.walk(startDir, topdown=True):
-    if re.search("\\\[0-9]{4}-[0-1][0-9]$", root) or root.endswith("Unknown date"):
+    if re.search(dateRegex, root) or root.endswith("Unknown date"):
         continue
     for file in files:
         name, ext = os.path.splitext(file)
@@ -78,6 +78,7 @@ for root, dirs, files in os.walk(startDir, topdown=True):
             newDirName = f"{year}\{year}-{month}"
             moveToDir(file, pathOfFile, newDirName)
 
+print()
 print(bcolors.OKGREEN + f"Moved files: {movedCount}"+bcolors.ENDC)
 print(f"Files with unknown date: {invalidCount}"+bcolors.ENDC)
 print(bcolors.FAIL + f"Errors: {notMovedCount}"+bcolors.ENDC)
