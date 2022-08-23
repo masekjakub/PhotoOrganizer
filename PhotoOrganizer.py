@@ -13,7 +13,7 @@ class bcolors:
 
 
 IMGTYPES = ('.img', '.jpg', '.JPG', '.jpeg', 'JPEG',
-            '.png', '.PNG', '.raw', '.jfif', '.mp4')
+            '.png', '.PNG', '.raw', '.jfif', '.mp4','.avi')
 
 dateRegex = "\\\[0-9]{4}-[0-1][0-9]$"
 movedCount = 0
