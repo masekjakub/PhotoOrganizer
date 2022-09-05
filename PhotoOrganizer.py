@@ -12,8 +12,8 @@ class bcolors:
     ENDC = '\033[0m'
 
 
-IMGTYPES = ('.img', '.jpg', '.JPG', '.jpeg', 'JPEG',
-            '.png', '.PNG', '.raw', '.RAW', '.jfif', '.mp4', '.avi')
+IMGTYPES = ('.img', '.jpg', '.JPG', '.jpeg', '.JPEG', '.GIF','.gif',
+            '.png', '.PNG', '.raw', '.RAW', '.jfif', '.mp4', '.avi', '.CR4')
 
 dateRegex = "\\\[0-9]{4}-[0-1][0-9]$"
 movedCount = 0
