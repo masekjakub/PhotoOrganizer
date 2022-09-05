@@ -13,7 +13,7 @@ class bcolors:
 
 
 IMGTYPES = ('.img', '.jpg', '.JPG', '.jpeg', 'JPEG',
-            '.png', '.PNG', '.raw', '.jfif', '.mp4','.avi')
+            '.png', '.PNG', '.raw', '.RAW', '.jfif', '.mp4', '.avi')
 
 dateRegex = "\\\[0-9]{4}-[0-1][0-9]$"
 movedCount = 0
@@ -29,17 +29,17 @@ def getDate(file):
         return dateTimeArr[0]
 
 
-def moveToDir(file, path, dirName):
+def moveToDir(fileName, fileFullPath, newDirName):
     global movedCount
     global notMovedCount
-    os.makedirs(dirName, exist_ok=True)
+    os.makedirs(newDirName, exist_ok=True)
 
     # if image is already in folder
-    if os.path.exists(f"{startDir}\{dirName}\{file}"):
-        os.remove(path)
+    if os.path.exists(f"{startDir}\{newDirName}\{fileName}"):
+        os.remove(fileFullPath)
         return
     try:
-        shutil.move(path, dirName)
+        shutil.move(fileFullPath, newDirName)
         movedCount = movedCount+1
     except:
         notMovedCount = notMovedCount+1
@@ -62,17 +62,17 @@ for root, dirs, files in os.walk(startDir, topdown=True):
     for file in files:
         name, ext = os.path.splitext(file)
         if any(ext in file for ext in IMGTYPES):
-            pathOfFile = os.path.join(root, file)
+            fileFullPath = os.path.join(root, file)
             try:
-                dateTaken = getDate(pathOfFile)
+                dateTaken = getDate(fileFullPath)
             except:
-                moveToDir(file, pathOfFile, "Unknown date")
+                moveToDir(file, fileFullPath, "Unknown date")
                 invalidCount = invalidCount+1
                 continue
 
             year, month, day = dateTaken.split(":")
             newDirName = f"{year}\{year}-{month}"
-            moveToDir(file, pathOfFile, newDirName)
+            moveToDir(file, fileFullPath, newDirName)
 
 print()
 print(bcolors.OKGREEN + f"Moved files: {movedCount}"+bcolors.ENDC)
